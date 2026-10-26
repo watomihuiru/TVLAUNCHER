@@ -15,6 +15,21 @@ android {
         versionName '3.0'
     }
 
+    // A permanent key from CI (secret SIGNING_P12_BASE64) so updates install over each other; without it,
+    // the debug key as before.
+    def signingStore = System.getenv("SIGNING_STORE_FILE")
+    if (signingStore) {
+        signingConfigs {
+            release {
+                storeFile file(signingStore)
+                storeType "pkcs12"
+                storePassword System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias "tvhome"
+                keyPassword System.getenv("SIGNING_STORE_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             // R8 strips and optimises the code (AndroidX included): smaller APK, faster start on a slow TV CPU.
@@ -22,7 +37,7 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             // Sideloaded over ADB, never published: sign with the debug key so it installs over a debug build.
-            signingConfig signingConfigs.debug
+            signingConfig signingStore ? signingConfigs.release : signingConfigs.debug
         }
     }
 

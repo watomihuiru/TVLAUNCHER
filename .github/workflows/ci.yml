@@ -59,6 +59,17 @@ jobs:
         with:
           packages: platforms;android-34 build-tools;34.0.0
       - uses: gradle/actions/setup-gradle@v4
+      - name: Signing key
+        env:
+          SIGNING_P12_BASE64: ${{ secrets.SIGNING_P12_BASE64 }}
+        run: |
+          if [ -n "$SIGNING_P12_BASE64" ]; then
+            echo "$SIGNING_P12_BASE64" | base64 -d > "$RUNNER_TEMP/tvhome.p12"
+            echo "SIGNING_STORE_FILE=$RUNNER_TEMP/tvhome.p12" >> "$GITHUB_ENV"
+            echo "SIGNING_STORE_PASSWORD=tvhome-sign" >> "$GITHUB_ENV"
+          else
+            echo "::warning::No SIGNING_P12_BASE64 secret: the APK is signed with a throwaway debug key"
+          fi
       - name: Unit tests, lint and release build
         working-directory: launcher
         run: |

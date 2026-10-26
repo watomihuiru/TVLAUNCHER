@@ -137,6 +137,19 @@ final class WallpaperPlayer {
         active = false;
     }
 
+    /**
+     * VideoWallpaper: true while its first frame is on screen, so the picture and the root colour stop covering the
+     * SurfaceView; false puts them back.
+     */
+    void setCovered(boolean video) {
+        image.setVisibility(video ? View.INVISIBLE : View.VISIBLE);
+        if (video) {
+            root.setBackground(null);
+        } else if (current == null) {
+            root.setBackgroundColor(backgroundColor);
+        }
+    }
+
     /** Drops the wallpaper texture when Home is hidden and Android asks the process to free memory. */
     void releaseForMemoryPressure() {
         if (current == null) return;
